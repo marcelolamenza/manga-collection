@@ -53,5 +53,13 @@ describe('Firestore user isolation rules', () => {
     await assertFails(setDoc(doc(alice, 'users/alice/manga/naruto'), invalidStatus));
     await assertFails(setDoc(doc(alice, 'users/alice/manga/other'), mangaData('naruto')));
   });
+
+  it('allows the supported manual publisher values and rejects unknown publishers', async () => {
+    const alice = testEnv.authenticatedContext('alice').firestore();
+    const withPublisher = JSON.parse(JSON.stringify(createManga({ title: 'One Piece', coverUrl: '', totalVolumes: 3, publisher: 'Panini' }, 'one-piece')));
+    const invalidPublisher = { ...mangaData('unknown-publisher'), publisher: 'Unknown Press' };
+    await assertSucceeds(setDoc(doc(alice, 'users/alice/manga/one-piece'), withPublisher));
+    await assertFails(setDoc(doc(alice, 'users/alice/manga/unknown-publisher'), invalidPublisher));
+  });
 });
 

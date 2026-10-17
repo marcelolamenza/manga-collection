@@ -13,7 +13,7 @@ service cloud.firestore {
         && data.keys().hasOnly([
           'id', 'title', 'coverUrl', 'totalVolumes', 'statuses',
           'volumeEditions', 'section', 'provider', 'providerId',
-          'editionNotes', 'createdAt', 'updatedAt'
+          'editionNotes', 'publisher', 'createdAt', 'updatedAt'
         ])
         && data.id == mangaId
         && data.title is string && data.title.size() > 0 && data.title.size() <= 120
@@ -23,6 +23,7 @@ service cloud.firestore {
         && data.statuses.hasOnly(['read', 'bought', 'transit', 'missing'])
         && data.volumeEditions is list && data.volumeEditions.size() == data.totalVolumes
         && data.section in ['In progress', 'Complete', 'Read']
+        && (!('publisher' in data) || data.publisher in ['JBC', 'Panini', 'New Pop', 'Darksiders', 'MPEG'])
         && data.createdAt is string && data.updatedAt is string
         && (!('provider' in data) || data.provider is string)
         && (!('providerId' in data) || data.providerId is string)
@@ -43,3 +44,4 @@ service cloud.firestore {
     }
   }
 }
+
