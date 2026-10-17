@@ -21,7 +21,11 @@ beforeAll(async () => {
 afterEach(async () => { if (testEnv) await testEnv.clearFirestore(); });
 afterAll(async () => { if (testEnv) await testEnv.cleanup(); });
 
-const mangaData = (id: string) => createManga({ title: 'Naruto', coverUrl: '', totalVolumes: 3 }, id);
+const mangaData = (id: string) => {
+  const record = createManga({ title: 'Naruto', coverUrl: '', totalVolumes: 3 }, id);
+  // Firestore rejects undefined properties; mirror the production adapter's JSON cleanup.
+  return JSON.parse(JSON.stringify(record)) as typeof record;
+};
 
 describe('Firestore user isolation rules', () => {
   it('allows a user to create and read only their own manga', async () => {
@@ -50,3 +54,4 @@ describe('Firestore user isolation rules', () => {
     await assertFails(setDoc(doc(alice, 'users/alice/manga/other'), mangaData('naruto')));
   });
 });
+
