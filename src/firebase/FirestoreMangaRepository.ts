@@ -63,6 +63,19 @@ export class FirestoreMangaRepository implements MangaRepository {
     });
   }
 
+  async setAllStatuses(id: string, status: VolumeStatus): Promise<Manga> {
+    if (!validateStatus(status)) throw new Error('Choose a valid volume status.');
+    const ref = doc(this.mangaCollection, id);
+    return runTransaction(this.db, async transaction => {
+      const snapshot = await transaction.get(ref);
+      if (!snapshot.exists()) throw new Error('That manga could not be found.');
+      const manga = normalizeMangaRecord(snapshot.data(), snapshot.id);
+      const changed = { ...manga, statuses: Array(manga.totalVolumes).fill(status), updatedAt: new Date().toISOString() };
+      transaction.set(ref, clean(changed));
+      return changed;
+    });
+  }
+
   async setVolumeEdition(id: string, volumeIndex: number, edition: VolumeEdition): Promise<Manga> {
     if (!edition || !['google-books', 'open-library'].includes(edition.provider) || !edition.providerId || !edition.title) throw new Error('Choose a valid catalog result.');
     const ref = doc(this.mangaCollection, id);
@@ -114,3 +127,4 @@ export class FirestoreMangaRepository implements MangaRepository {
     return { added: candidates.length, skipped, alreadyCompleted: false };
   }
 }
+

@@ -40,4 +40,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline-color:#9ad
 .total-volume.read strong{color:#82edaa}.total-volume.bought strong{color:#a8c5ed}.total-volume.transit strong{color:#e4c57c}.total-volume.missing strong{color:#aab6c1}
 @media(max-width:620px){.collection-totals{grid-template-columns:repeat(2,minmax(0,1fr));padding:9px;gap:7px}.total-volume{padding:9px}.total-volume.all-volumes{grid-column:1/-1}.total-volume span{font-size:10px}footer{flex-wrap:wrap;gap:11px}.local-note{flex-basis:100%;margin-left:0}}
 .volume-number{color:inherit;font-size:9px;font-weight:800;letter-spacing:-.1px}
+.volume.missing{background:#303a44;border-color:#697782;color:#c3cbd1}
+.bulk-status-section{padding-top:4px}
+.bulk-status-section button{display:flex;align-items:center;gap:8px;width:100%;text-align:left}
 
