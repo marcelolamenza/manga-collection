@@ -43,14 +43,14 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline-color:#9ad
 .volume.missing{background:#303a44;border-color:#697782;color:#c3cbd1}
 .bulk-status-section{padding-top:4px}
 .bulk-status-section button{display:flex;align-items:center;gap:8px;width:100%;text-align:left}
-.volume.bought{background:#1b4935;border-color:#50c77d;color:#9af0b5}
-.volume.read{background:#4a3b1d;border-color:#a88c3b;color:#f5df91}
+.volume.bought{background:#4a3b1d;border-color:#a88c3b;color:#f5df91}
+.volume.read{background:#1b4935;border-color:#50c77d;color:#9af0b5}
 .volume.transit{background:#203b52;border-color:#4388bf;color:#a8d8fa}
-.mini-icon.bought,.legend-item.bought i{background:#1b4935;color:#9af0b5}
-.mini-icon.read,.legend-item.read i{background:#4a3b1d;color:#f5df91}
+.mini-icon.bought,.legend-item.bought i{background:#4a3b1d;color:#f5df91}
+.mini-icon.read,.legend-item.read i{background:#1b4935;color:#9af0b5}
 .mini-icon.transit,.legend-item.transit i{background:#203b52;color:#a8d8fa}
-.total-volume.bought strong{color:#9af0b5}
-.total-volume.read strong{color:#f5df91}
+.total-volume.bought strong{color:#f5df91}
+.total-volume.read strong{color:#9af0b5}
 .total-volume.transit strong{color:#a8d8fa}
 
 .publisher-label{display:block;margin-top:4px;color:#aeb9c3!important;font-size:10px!important}.action-menu{max-height:calc(100vh - 52px);overflow-y:auto}
