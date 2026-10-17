@@ -53,3 +53,5 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline-color:#9ad
 .total-volume.read strong{color:#f5df91}
 .total-volume.transit strong{color:#a8d8fa}
 
+.publisher-select{display:block;width:fit-content;max-width:140px;height:23px;margin-top:5px;padding:2px 20px 2px 6px;border:1px solid #44515e;border-radius:5px;background:#27343f;color:#c8d4de;font-size:10px;line-height:1.2;cursor:pointer}.publisher-select option{background:#27343f;color:#e7edf3}
+

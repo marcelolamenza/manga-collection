@@ -1,5 +1,5 @@
 import { collection, deleteDoc, doc, getDoc, getDocs, runTransaction, setDoc, writeBatch, type Firestore } from 'firebase/firestore';
-import { createManga, normalizeMangaRecord, resizeManga, validateSection, validateStatus, type CollectionSection, type Manga, type MangaInput, type VolumeEdition, type VolumeStatus } from '../model';
+import { createManga, normalizeMangaRecord, resizeManga, validatePublisher, validateSection, validateStatus, type CollectionSection, type Manga, type MangaInput, type MangaPublisher, type VolumeEdition, type VolumeStatus } from '../model';
 import type { MangaRepository } from '../repository';
 
 const clean = (value: unknown) => JSON.parse(JSON.stringify(value)) as Record<string, unknown>;
@@ -28,7 +28,7 @@ export class FirestoreMangaRepository implements MangaRepository {
     if (!allowSeparateEdition) {
       const existing = await getDocs(this.mangaCollection);
       if (existing.docs.some(record => sameTitle(String(record.data().title ?? ''), item.title))) {
-        throw new Error('This title is already in your collection. Choose “Add as a separate edition” to keep both editions.');
+        throw new Error('This title is already in your collection. Choose â€œAdd as a separate editionâ€ to keep both editions.');
       }
     }
     await setDoc(ref, clean(item));
@@ -99,6 +99,18 @@ export class FirestoreMangaRepository implements MangaRepository {
       const snapshot = await transaction.get(ref);
       if (!snapshot.exists()) throw new Error('That manga could not be found.');
       const changed = { ...normalizeMangaRecord(snapshot.data(), snapshot.id), section, updatedAt: new Date().toISOString() };
+      transaction.set(ref, clean(changed));
+      return changed;
+    });
+  }
+
+  async setPublisher(id: string, publisher: MangaPublisher | undefined): Promise<Manga> {
+    if (publisher !== undefined && !validatePublisher(publisher)) throw new Error('Choose a valid publisher.');
+    const ref = doc(this.mangaCollection, id);
+    return runTransaction(this.db, async transaction => {
+      const snapshot = await transaction.get(ref);
+      if (!snapshot.exists()) throw new Error('That manga could not be found.');
+      const changed = { ...normalizeMangaRecord(snapshot.data(), snapshot.id), publisher, updatedAt: new Date().toISOString() };
       transaction.set(ref, clean(changed));
       return changed;
     });
