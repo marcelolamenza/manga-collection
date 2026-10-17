@@ -9,7 +9,7 @@ A responsive manga collection manager built with React, TypeScript, and Vite. Th
 3. Run `npm run dev` and open the local URL Vite prints.
 4. Without Firebase environment values, the app uses `localStorage` in this browser profile. The data is not cloud-backed or shared across devices.
 
-This checkout is now connected to the `mangaCatalog` Firebase project (`mangacatalog-83f34`). Its web app config is in `.env.local`, which is git-ignored. These web app values identify the Firebase project; user data access is protected by Authentication and Firestore Security Rules. Do not add service account credentials to the frontend. If you clone the repo elsewhere, copy `.env.example` to `.env.local`, fill it with your Firebase web app config, and restart Vite.
+This checkout is connected locally to the `mangaCatalog` Firebase project (`mangacatalog-83f34`). The local web app config is in `.env.local`, which is git-ignored. GitHub Pages gets the same public web config from GitHub Actions repository variables. Firebase web config identifies the project and is included in client builds. User data access is protected by Authentication and Firestore Security Rules. Never add service account credentials to the frontend. If you clone the repo for your own Firebase project, copy `.env.example` to `.env.local` and provide your web app config there.
 
 In the Firebase Console:
 
@@ -30,6 +30,25 @@ Desktop uses Google’s popup flow; mobile browsers use redirect sign-in. The ap
 - `npm run test:rules` — run Firestore Security Rules tests with the local emulator. Requires Java and downloads/runs the Firebase emulator on first use.
 - `npm run deploy:rules` — deploy Firestore rules with Firebase CLI after selecting the project.
 - `npm run preview` — preview a production build.
+
+## Publish on GitHub Pages
+
+The `.github/workflows/deploy-pages.yml` workflow runs the unit tests and Firestore rules emulator tests, builds the Vite app with the repository subpath, then deploys `dist` to GitHub Pages on every push to `main`. It uses Java 21 in CI for the Firestore emulator.
+
+One-time GitHub setup:
+
+1. Open this repository on GitHub and go to **Settings → Pages**.
+2. Under **Build and deployment**, set **Source** to **GitHub Actions**.
+3. Open **Settings → Secrets and variables → Actions → Variables** and add these five repository variables using the matching values from Firebase Project settings → General → Your apps → Web app config: `VITE_FIREBASE_API_KEY` (`apiKey`), `VITE_FIREBASE_AUTH_DOMAIN` (`authDomain`), `VITE_FIREBASE_PROJECT_ID` (`projectId`), `VITE_FIREBASE_APP_ID` (`appId`), and `VITE_FIREBASE_MESSAGING_SENDER_ID` (`messagingSenderId`). These Firebase web config values are public identifiers; do not put service account credentials in repository variables or the frontend.
+4. Push to `main` or manually run **Actions → Test and deploy GitHub Pages → Run workflow**.
+5. When the workflow succeeds, the site is available at `https://marcelolamenza.github.io/manga-collection/`.
+6. In Firebase Console → **Authentication → Settings → Authorized domains**, add `marcelolamenza.github.io` so Google sign-in works from the Pages domain.
+
+Every later push to `main` automatically reruns the tests and deploys the new site. Firebase's client configuration is public; Firestore Security Rules provide the data access control.
+
+### Run Firestore rules tests on Windows
+
+Install a Java 21 JDK, such as Eclipse Temurin 21 for Windows x64, and select the MSI installer. During setup, enable the options to add Java to `PATH` and set `JAVA_HOME` if offered. Close and reopen PowerShell, verify `java -version`, then run `npm run test:rules`. The GitHub Actions workflow installs Java 21 automatically, so local Java is only needed to run the emulator tests on your computer.
 
 ## Architecture
 
