@@ -39,4 +39,5 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline-color:#9ad
 .total-volume.all-volumes{background:#17232d;border:1px solid #4b5b67}.total-volume.all-volumes span{font-weight:700;color:#e2eaf0}.total-volume.all-volumes strong{font-size:22px;color:#75ed9d}
 .total-volume.read strong{color:#82edaa}.total-volume.bought strong{color:#a8c5ed}.total-volume.transit strong{color:#e4c57c}.total-volume.missing strong{color:#aab6c1}
 @media(max-width:620px){.collection-totals{grid-template-columns:repeat(2,minmax(0,1fr));padding:9px;gap:7px}.total-volume{padding:9px}.total-volume.all-volumes{grid-column:1/-1}.total-volume span{font-size:10px}footer{flex-wrap:wrap;gap:11px}.local-note{flex-basis:100%;margin-left:0}}
+.volume-number{color:inherit;font-size:9px;font-weight:800;letter-spacing:-.1px}
 
