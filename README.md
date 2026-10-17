@@ -1,42 +1,62 @@
-# Panel — Manga Collection Catalog
+﻿# Panel — Manga Collection Catalog
 
-A responsive Phase 1 prototype for keeping track of manga editions and volume statuses. Built with React, TypeScript, and Vite. It uses browser `localStorage`; data is local to this browser profile and is not cloud-backed or shared across devices. There is no sign-in.
+A responsive manga collection manager built with React, TypeScript, and Vite. The app now supports two persistence modes: browser-local prototype mode when Firebase is not configured, and Google sign-in with private Firestore storage when Firebase is configured.
 
 ## Run locally
 
 1. Install Node.js 20 or newer.
-2. From this folder, run `npm install`.
-3. Start the development server with `npm run dev` and open the URL Vite prints.
+2. Run `npm install`.
+3. Run `npm run dev` and open the local URL Vite prints.
+4. Without Firebase environment values, the app uses `localStorage` in this browser profile. The data is not cloud-backed or shared across devices.
 
-Use `npm test` for the business-logic tests and `npm run build` to type-check and create a production build.
+This checkout is now connected to the `mangaCatalog` Firebase project (`mangacatalog-83f34`). Its web app config is in `.env.local`, which is git-ignored. These web app values identify the Firebase project; user data access is protected by Authentication and Firestore Security Rules. Do not add service account credentials to the frontend. If you clone the repo elsewhere, copy `.env.example` to `.env.local`, fill it with your Firebase web app config, and restart Vite.
 
-## Features
+In the Firebase Console:
 
-- Collection list with cover fallbacks, responsive volume indicators, owned count, and progress.
-- Three manually managed collection sections: In progress, Complete, and Read. Section placement changes only when the user chooses it; volume statuses never move a manga automatically.
-- Each volume indicator shows its volume number alongside the status icon.
-- Four volume statuses: Read, Bought, In transit, and Don't have. Read and Bought count as owned.
-- Clicking a volume opens a compact floating menu with all four status choices. Status changes save without a success notification.
-- Search by title, alphabetical/owned/progress sorting, and progress filters.
-- Add manga using the Kitsu public manga catalog, with Open Library as a no-key fallback, or enter manually. Edit metadata and remove entries. If both online catalogs are unavailable, matching built-in sample results are offered where possible.
-- Online search starts after 300 ms of typing, ignores/cancels stale requests, limits results, and caches successful normalized queries in memory for five minutes. Open Library starts if Kitsu has no useful result or is still pending after a short 300 ms hedge. Covers load independently from results and use a built-in fallback if a source cover is missing or fails.
-- Search Open Library for editions of a selected volume number. Results expose edition-specific publisher, publication date, ISBNs, and a link to the source record; the user chooses what to save. Check Kitsu for a series volume count to explicitly resize an existing grid. These are catalog suggestions, so review the returned series or edition before applying it.
-- Duplicate title prevention with an explicit separate-edition option, and confirmation before a volume-count reduction discards saved statuses.
-- Starter sample collection on first launch (13, 35, and 7 volumes). Remove all sample entries to reach the empty state. Browser storage failures show an error.
+1. Create a Firebase project and register a Web app.
+2. Enable Google in Authentication → Sign-in method. Firebase Authentication handles identity; this app requests no Gmail, Drive, contacts, or other Google scopes.
+3. Add the local and deployed site domains under Authentication → Settings → Authorized domains.
+4. Create the Cloud Firestore database.
+5. Deploy the included rules with `npm run deploy:rules` (or `npx firebase deploy --only firestore:rules --project YOUR_PROJECT_ID`). The CLI default is `mangacatalog-83f34` in this checkout.
+6. For another Firebase project, configure `.env.local` with all five `VITE_FIREBASE_*` values shown in `.env.example`.
+
+Desktop uses Google’s popup flow; mobile browsers use redirect sign-in. The app does not handle Google passwords. Authentication cannot work until a project is configured, Google sign-in is enabled, the domain is authorized, and Firestore is provisioned.
+
+## Development commands
+
+- `npm run dev` — start Vite.
+- `npm run build` — TypeScript check and production build.
+- `npm test` — deterministic unit and UI tests.
+- `npm run test:rules` — run Firestore Security Rules tests with the local emulator. Requires Java and downloads/runs the Firebase emulator on first use.
+- `npm run deploy:rules` — deploy Firestore rules with Firebase CLI after selecting the project.
+- `npm run preview` — preview a production build.
 
 ## Architecture
 
-- `src/model.ts`: validated catalog types, creation, resizing, and progress calculations.
-- `src/repository.ts`: `MangaRepository` interface and `LocalMangaRepository` adapter. UI components depend on this boundary rather than storage calls.
-- `src/provider.ts`: provider interfaces, Kitsu series catalog adapter, Open Library search fallback and edition lookup, five-minute search/edition metadata caches, bounded requests, and offline sample provider. Provider identity is stored separately from edition fields.
-- `src/ui/SearchResultCover.tsx`: fixed-size, lazy-loaded search/edition thumbnails with fallback artwork and alternate Kitsu image variants.
-- `src/ui/`: collection interface, dialogs, status controls, and responsive design tokens/styles.
+- `src/model.ts` validates manga and volume status records and calculates progress.
+- `src/repository.ts` defines the persistence interface and browser-local adapter.
+- `src/firebase/client.ts` initializes Firebase only when all config values are provided.
+- `src/firebase/auth.ts` contains Google identity sign-in/out and user-readable Firebase errors.
+- `src/firebase/FirestoreMangaRepository.ts` stores records under `users/{uid}/manga`; UI components use the same repository boundary in either mode.
+- `firestore.rules` denies access unless the authenticated UID owns the requested user path and validates manga document fields.
+- `tests/firestore.rules.test.ts` checks cross-user isolation, unauthenticated access, and schema rejection in the Firestore emulator.
+- `src/provider.ts` contains the modular external metadata providers; external catalog fields stay separate from edition metadata.
 
-The repository/provider seams allow other providers and persistence adapters to be added. Different printings and regional editions are represented as separate records with optional edition notes. Kitsu may not know Brazilian or other localized publication schedules; always review the returned volume count and edition details before saving.
+After signing in, if local prototype records exist and this account has not completed migration, the app asks before importing. Migration copies stable local IDs, skips IDs already in the account, reports the result, and retains the browser-local copy. Import is limited to 400 writes per batch and marks completion only after the batches finish; if interrupted, retry skips already-created IDs.
+
+## Catalog features
+
+- Search online using Kitsu with Open Library fallback, with manual entry always available.
+- Add from search or manually; edit, remove, and keep separate editions intentionally.
+- Track a status for every numbered volume: Read, Bought, In transit, or Don't have. Read and Bought count as owned.
+- Move manga manually between In progress, Complete, and Read sections.
+- Search, sort, filter by progress, and review edition ISBN/publisher details.
+- Cover loading is independent of search results and uses a fallback when an image is absent or broken.
 
 ## Limitations
 
-- This prototype has no Firebase, authentication, cloud sync, or cross-device sharing.
-- Online search requires internet access and the Kitsu and/or Open Library catalogs. Kitsu is manga-specific; Open Library is a broad book catalog and may have weaker manga coverage. Catalog records may describe another language, publisher, or printing, so verify the ISBN and source record against the volume you own or intend to buy.
-- AniList was evaluated as a possible source but is not integrated. Its published terms prohibit use in competing manga list/tracker services unless authorized, so this collection app must not use it without approval from AniList.
-- Data lives in this browser's local storage and can be cleared by browser settings.
+- Without Firebase configuration, persistence is limited to the current browser profile and is not shared across devices.
+- Firebase Google sign-in and Firestore have been implemented but are not operational until configured against a Firebase project and verified with real credentials.
+- Firebase duplicate-title checks run before writes; simultaneous additions from multiple devices can race. Rules still isolate users and validate record structure.
+- Online catalog metadata may omit localized schedules or describe another printing. Verify volume counts, publisher and ISBN before applying suggestions.
+- AniList is not integrated; its published terms prohibit use in competing manga list/tracker services unless authorized.

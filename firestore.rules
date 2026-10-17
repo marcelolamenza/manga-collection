@@ -1,0 +1,45 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function owns(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+
+    function validManga(data, mangaId) {
+      return data.keys().hasAll([
+          'id', 'title', 'coverUrl', 'totalVolumes', 'statuses',
+          'volumeEditions', 'section', 'createdAt', 'updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'id', 'title', 'coverUrl', 'totalVolumes', 'statuses',
+          'volumeEditions', 'section', 'provider', 'providerId',
+          'editionNotes', 'createdAt', 'updatedAt'
+        ])
+        && data.id == mangaId
+        && data.title is string && data.title.size() > 0 && data.title.size() <= 120
+        && data.coverUrl is string && data.coverUrl.size() <= 2048
+        && data.totalVolumes is int && data.totalVolumes >= 1 && data.totalVolumes <= 500
+        && data.statuses is list && data.statuses.size() == data.totalVolumes
+        && data.statuses.hasOnly(['read', 'bought', 'transit', 'missing'])
+        && data.volumeEditions is list && data.volumeEditions.size() == data.totalVolumes
+        && data.section in ['In progress', 'Complete', 'Read']
+        && data.createdAt is string && data.updatedAt is string
+        && (!('provider' in data) || data.provider is string)
+        && (!('providerId' in data) || data.providerId is string)
+        && (!('editionNotes' in data) || (data.editionNotes is string && data.editionNotes.size() <= 240));
+    }
+
+    match /users/{userId}/manga/{mangaId} {
+      allow read, delete: if owns(userId);
+      allow create, update: if owns(userId) && validManga(request.resource.data, mangaId);
+    }
+
+    match /users/{userId}/migrations/{migrationId} {
+      allow read, write: if owns(userId);
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
