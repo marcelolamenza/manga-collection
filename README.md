@@ -1,4 +1,4 @@
-﻿# Panel — Manga Collection Catalog
+# Panel — Manga Collection Catalog
 
 A responsive manga collection manager built with React, TypeScript, and Vite. The app now supports two persistence modes: browser-local prototype mode when Firebase is not configured, and Google sign-in with private Firestore storage when Firebase is configured.
 
@@ -20,7 +20,7 @@ In the Firebase Console:
 5. Deploy the included rules with `npm run deploy:rules` (or `npx firebase deploy --only firestore:rules --project YOUR_PROJECT_ID`). The CLI default is `mangacatalog-83f34` in this checkout.
 6. For another Firebase project, configure `.env.local` with all five `VITE_FIREBASE_*` values shown in `.env.example`.
 
-Desktop uses Google’s popup flow; mobile browsers use redirect sign-in. The app does not handle Google passwords. Authentication cannot work until a project is configured, Google sign-in is enabled, the domain is authorized, and Firestore is provisioned.
+Google sign-in uses Firebase’s popup flow on desktop and mobile. This avoids redirect sign-in’s cross-site storage dependency when the app is hosted on GitHub Pages. The app does not handle Google passwords. Authentication cannot work until a project is configured, Google sign-in is enabled, the domain is authorized, and Firestore is provisioned.
 
 ## Development commands
 
@@ -79,3 +79,4 @@ After signing in, if local prototype records exist and this account has not comp
 - Firebase duplicate-title checks run before writes; simultaneous additions from multiple devices can race. Rules still isolate users and validate record structure.
 - Online catalog metadata may omit localized schedules or describe another printing. Verify volume counts, publisher and ISBN before applying suggestions.
 - AniList is not integrated; its published terms prohibit use in competing manga list/tracker services unless authorized.
+

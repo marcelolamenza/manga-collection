@@ -1,4 +1,4 @@
-import { GoogleAuthProvider, signInWithPopup, signInWithRedirect, signOut, type Auth } from 'firebase/auth';
+import { GoogleAuthProvider, signInWithPopup, signOut, type Auth } from 'firebase/auth';
 
 export function firebaseErrorMessage(error: unknown): string {
   const code = (error as { code?: string })?.code ?? '';
@@ -15,8 +15,11 @@ export function firebaseErrorMessage(error: unknown): string {
 export async function signInWithGoogle(auth: Auth): Promise<void> {
   const provider = new GoogleAuthProvider();
   provider.setCustomParameters({ prompt: 'select_account' });
-  if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) await signInWithRedirect(auth, provider);
-  else await signInWithPopup(auth, provider);
+  // GitHub Pages cannot proxy Firebase's auth helper to the app origin. On
+  // mobile browsers that block third-party storage, signInWithRedirect can
+  // return without restoring the session; a popup avoids that cross-site step.
+  await signInWithPopup(auth, provider);
 }
 
 export async function signOutGoogle(auth: Auth): Promise<void> { await signOut(auth); }
+
