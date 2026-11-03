@@ -23,6 +23,11 @@ export function normalizeMangaRecord(value: unknown, fallbackId?: string): Manga
   return { ...record, id, title: record.title, coverUrl: record.coverUrl, totalVolumes: totalVolumes as number, statuses: record.statuses as VolumeStatus[], volumeEditions: volumeEditions as (VolumeEdition | null)[], section: (record.section as CollectionSection | undefined) ?? 'In progress', createdAt: typeof record.createdAt === 'string' ? record.createdAt : '', updatedAt: typeof record.updatedAt === 'string' ? record.updatedAt : '' } as Manga;
 }
 export function ownedCount(m: Manga) { return m.statuses.filter(s => s === 'read' || s === 'bought').length; }
+export function collectionSectionForStatuses(statuses: VolumeStatus[]): CollectionSection {
+  if (statuses.length && statuses.every(status => status === 'read')) return 'Read';
+  if (statuses.length && statuses.every(status => status === 'read' || status === 'bought')) return 'Complete';
+  return 'In progress';
+}
 export function progressPercent(m: Manga) { return m.totalVolumes ? Math.round(ownedCount(m) / m.totalVolumes * 100) : 0; }
 export function createManga(input: MangaInput, id: string = crypto.randomUUID()): Manga {
   const title = input.title.trim(); const count = Number(input.totalVolumes);
