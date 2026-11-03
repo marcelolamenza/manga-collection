@@ -100,3 +100,5 @@ body{background:#f6f5f2!important}
 
 :root:not([data-theme="dark"]) .manga-row{border-bottom-color:#d5d0c5}
 :root:not([data-theme="dark"]) .manga-row:last-child{border-bottom-color:transparent}
+
+@media(max-width:620px){.collection{overflow:visible}.manga-row:last-child .action-menu{top:auto;bottom:29px}}
